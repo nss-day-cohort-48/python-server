@@ -1,8 +1,11 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from animals import get_all_animals
 
+
 class HandleRequests(BaseHTTPRequestHandler):
-    
+    """Handles requests to the server for GET, POST, PUT, and Delete
+    """
+
     def _set_headers(self, status):
         """Sets the headers of the response
 
@@ -19,8 +22,10 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-        self.send_header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept')
+        self.send_header('Access-Control-Allow-Methods',
+                         'GET, POST, PUT, DELETE')
+        self.send_header('Access-Control-Allow-Headers',
+                         'X-Requested-With, Content-Type, Accept')
         self.end_headers()
 
     def do_GET(self):
@@ -28,11 +33,11 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         self._set_headers(200)
         print(self.path)
-        if self.path =='/animals':
+        if self.path == '/animals':
             response = get_all_animals()
         else:
-            response=[]
-        
+            response = []
+
         self.wfile.write(f'{response}'.encode())
 
     def do_POST(self):
