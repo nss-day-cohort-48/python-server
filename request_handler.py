@@ -1,7 +1,6 @@
 import json
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from multiprocessing.sharedctypes import Value
 from animals import get_all_animals, get_single_animal, create_animal
 
 
@@ -20,7 +19,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
-    def parse_url(self, path): # pylint: disable=no-self-use
+    def parse_url(self, path):
         """Parses the url to return the resource and id
         """
         path_params = path.split('/')
@@ -31,9 +30,8 @@ class HandleRequests(BaseHTTPRequestHandler):
             id = int(path_params[2])
         except IndexError:
             pass
-        except ValueError as e:
+        except ValueError:
             pass
-            
 
         return (resource, id)
 
@@ -104,4 +102,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
