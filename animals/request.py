@@ -4,21 +4,24 @@ ANIMALS = [
         "name": "Snickers",
         "species": "Dog",
         "locationId": 1,
-        "customerId": 4
+        "customerId": 4,
+        "status": "Admitted"
     },
     {
         "id": 2,
         "name": "Gypsy",
         "species": "Dog",
         "locationId": 1,
-        "customerId": 2
+        "customerId": 2,
+        "status": "Admitted"
     },
     {
         "id": 3,
         "name": "Blue",
         "species": "Cat",
         "locationId": 2,
-        "customerId": 1
+        "customerId": 1,
+        "status": "Admitted"
     }
 ]
 
@@ -56,3 +59,39 @@ def create_animal(animal):
     ANIMALS.append(animal)
 
     return animal
+
+def delete_animal(id):
+    """
+    [summary]
+
+    Args:
+        id ([type]): [description]
+    """
+    animal_index = -1
+
+    for index, animal in enumerate(ANIMALS):
+        if animal["id"] == id:
+            animal_index = index
+            break
+
+    if animal_index >= 0:
+        ANIMALS.pop(animal_index)
+
+def update_animal(id_of_animal, new_animal_dict):
+    """
+        [summary]
+
+        Args:
+            id_of_animal ([type]): [description]
+            new_animal_dict ([type]): [description]
+    """
+
+    for index, animal in enumerate(ANIMALS):
+        # iterating the list
+        if animal['id'] == id_of_animal:
+            # when we find the correct animal (id matches arg)
+            # reassign value of item at current index to equal
+            # new animal dict arg
+            ANIMALS[index] = new_animal_dict
+            break
+        

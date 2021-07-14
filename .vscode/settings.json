@@ -1,3 +1,4 @@
 {
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "python.pythonPath": "/Users/monicakay/.local/share/virtualenvs/py-serve-kennels-lnO6hhVH/bin/python"
 }

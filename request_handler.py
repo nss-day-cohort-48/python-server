@@ -1,7 +1,7 @@
 import json
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from animals import get_all_animals, get_single_animal, create_animal
+from animals import get_all_animals, get_single_animal, create_animal, delete_animal, update_animal
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -20,7 +20,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.end_headers()
 
     def parse_url(self, path):
-        """Parses the url to return the resource and id
+        """Parses the url to return the resource and id as a tuple
         """
         path_params = path.split('/')
         resource = path_params[1]
@@ -68,6 +68,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         # Set response code to 'Created'
         self._set_headers(201)
+
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
@@ -89,8 +90,35 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_PUT(self):
         """Handles PUT requests to the server
         """
-        self.do_POST()
+        self._set_headers(204)
 
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+
+        (resource, id) = self.parse_url(self.path)
+
+        if resource == "animals":
+            update_animal(id, post_body)
+        if resource == "employees":
+            pass
+        if resource == "customers":
+            pass
+
+        self.wfile.write("".encode())
+
+    def do_DELETE(self):
+        """
+        [summary]
+        """
+        self._set_headers(204)
+
+        (resource_from_url, id_from_url) = self.parse_url(self.path)
+
+        if resource_from_url == "animals":
+            delete_animal(id_from_url)
+
+        self.wfile.write("".encode())
 
 def main():
     """Starts the server on port 8088 using the HandleRequests class
