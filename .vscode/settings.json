@@ -1,4 +1,11 @@
 {
     "python.linting.pylintEnabled": true,
-    "python.pythonPath": "/Users/monicakay/.local/share/virtualenvs/py-serve-kennels-lnO6hhVH/bin/python"
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Python Kennels",
+            "database": "./kennel.db"
+        }
+    ],
 }
