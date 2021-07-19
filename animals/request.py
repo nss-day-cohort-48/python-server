@@ -88,8 +88,7 @@ def get_single_animal(id):
             a.customer_id
         FROM animal a
         WHERE a.id = ?
-        or a.name = ?
-        """, (id, "snickers"))
+        """, (id, ))
 
         # Load the single result into memory
         data = db_cursor.fetchone()

@@ -2,6 +2,9 @@ import json
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from animals import get_all_animals, get_single_animal, create_animal, delete_animal, update_animal
+from locations import get_all_locations
+from employees import get_all_employees, get_single_employee
+from customers import get_all_customers, get_single_customer
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -55,11 +58,26 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
         response = f'{[]}'
 
-        if resource == 'animals':
+        if resource == "animals":
             if id is not None:
-                response = f'{get_single_animal(id)}'
+                response = f"{get_single_animal(id)}"
             else:
-                response = f'{get_all_animals()}'
+                response = f"{get_all_animals()}"
+        elif resource == "locations":
+            if id is not None:
+                response = f"{get_single_animal(id)}"
+            else:
+                response = f"{get_all_locations()}"
+        elif resource == "customers":
+            if id is not None:
+                response = f"{get_single_customer(id)}"
+            else:
+                response = f"{get_all_customers()}"
+        elif resource == "employees":
+            if id is not None:
+                response = f"{get_single_employee(id)}"
+            else:
+                response = f"{get_all_employees()}"
 
         self.wfile.write(response.encode())
 
@@ -83,9 +101,6 @@ class HandleRequests(BaseHTTPRequestHandler):
             response = {}
 
         self.wfile.write(f'{response}'.encode())
-
-    # Here's a method on the class that overrides the parent's method.
-    # It handles any PUT request.
 
     def do_PUT(self):
         """Handles PUT requests to the server
@@ -119,6 +134,7 @@ class HandleRequests(BaseHTTPRequestHandler):
             delete_animal(id_from_url)
 
         self.wfile.write("".encode())
+
 
 def main():
     """Starts the server on port 8088 using the HandleRequests class
