@@ -74,3 +74,63 @@ def get_single_customer(id):
         customer.id = data['id']
 
         return json.dumps(customer.__dict__)
+
+
+def get_customers_by_email(email):
+    """Gets customers by their email
+
+    Args:
+        email (string): the query parameter from the url
+
+    Returns:
+        string: a json formatted string
+    """
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        select
+            c.id,
+            c.name,
+            c.address,
+            c.email,
+            c.password
+        from Customer c
+        where c.email = ?
+        """, (email, ))
+        customers = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            customer = Customer(
+                row['id'], row['name'], row['address'], row['email'], row['password'])
+            customers.append(customer.__dict__)
+
+
+    return json.dumps(customers)
+
+def get_customers_by_name(full_name):
+    name = " ".join(full_name.split("+"))
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        select
+            c.id,
+            c.name,
+            c.address,
+            c.email,
+            c.password
+        from Customer c
+        where c.name = ?
+        """, (name, ))
+        customers = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            customer = Customer(
+                row['id'], row['name'], row['address'], row['email'], row['password'])
+            customers.append(customer.__dict__)
+    return json.dumps(customers)

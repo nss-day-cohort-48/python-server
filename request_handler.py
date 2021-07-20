@@ -4,7 +4,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from animals import get_all_animals, get_single_animal, create_animal, delete_animal, update_animal
 from locations import get_all_locations
 from employees import get_all_employees, get_single_employee
-from customers import get_all_customers, get_single_customer
+from customers import (get_all_customers, get_single_customer,
+                       get_customers_by_email, get_customers_by_name)
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -27,16 +28,26 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         path_params = path.split('/')
         resource = path_params[1]
-        id = None
+        if "?" in resource:
+            query = resource.split('?')
+            param = query[1]
+            resource = query[0]
+            pair = param.split('=')
+            key = pair[0]
+            value = pair[1]
 
-        try:
-            id = int(path_params[2])
-        except IndexError:
-            pass
-        except ValueError:
-            pass
+            return (resource, key, value)
 
-        return (resource, id)
+        else:
+            id = None
+            try:
+                id = int(path_params[2])
+            except IndexError:
+                pass
+            except ValueError:
+                pass
+
+            return (resource, id)
 
     def do_OPTIONS(self):
         """Sets the options headers
@@ -54,31 +65,38 @@ class HandleRequests(BaseHTTPRequestHandler):
         """
         self._set_headers(200)
         print(self.path)
+        parsed = self.parse_url(self.path)
 
-        (resource, id) = self.parse_url(self.path)
-        response = f'{[]}'
+        response = {}
+        if len(parsed) == 2:
 
-        if resource == "animals":
-            if id is not None:
-                response = f"{get_single_animal(id)}"
-            else:
-                response = f"{get_all_animals()}"
-        elif resource == "locations":
-            if id is not None:
-                response = f"{get_single_animal(id)}"
-            else:
-                response = f"{get_all_locations()}"
-        elif resource == "customers":
-            if id is not None:
-                response = f"{get_single_customer(id)}"
-            else:
-                response = f"{get_all_customers()}"
-        elif resource == "employees":
-            if id is not None:
-                response = f"{get_single_employee(id)}"
-            else:
-                response = f"{get_all_employees()}"
-
+            (resource, id) = parsed  # pylint: disable=unbalanced-tuple-unpacking
+            if resource == "animals":
+                if id is not None:
+                    response = f"{get_single_animal(id)}"
+                else:
+                    response = f"{get_all_animals()}"
+            elif resource == "locations":
+                if id is not None:
+                    response = f"{get_single_animal(id)}"
+                else:
+                    response = f"{get_all_locations()}"
+            elif resource == "customers":
+                if id is not None:
+                    response = f"{get_single_customer(id)}"
+                else:
+                    response = f"{get_all_customers()}"
+            elif resource == "employees":
+                if id is not None:
+                    response = f"{get_single_employee(id)}"
+                else:
+                    response = f"{get_all_employees()}"
+        elif len(parsed) == 3:
+            (resource, key, value) = parsed
+            if key == "email" and resource == "customers":
+                response = get_customers_by_email(value)
+            elif key == "name" and resource == "customers":
+                response = get_customers_by_name(value)
         self.wfile.write(response.encode())
 
     def do_POST(self):
@@ -91,7 +109,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
 
-        (resource, _) = self.parse_url(self.path)
+        (resource, _, _) = self.parse_url(self.path)
 
         response = None
 
@@ -111,7 +129,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
 
-        (resource, id) = self.parse_url(self.path)
+        (resource, id, _) = self.parse_url(self.path)
 
         if resource == "animals":
             update_animal(id, post_body)
@@ -124,16 +142,17 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         """
-        [summary]
+        Handles DELETE requests to the server
         """
         self._set_headers(204)
 
-        (resource_from_url, id_from_url) = self.parse_url(self.path)
+        (resource_from_url, id_from_url, _) = self.parse_url(self.path)
 
         if resource_from_url == "animals":
             delete_animal(id_from_url)
 
-        self.wfile.write("".encode())
+        # The .write method is not necessary because we are sending a 204 status code
+        # It is more explicit to have it though
 
 
 def main():

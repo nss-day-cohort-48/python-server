@@ -47,6 +47,7 @@ def get_all_animals():
             a.breed,
             a.status,
             a.location_id,
+            a.customer_id
             
         from animal a
         """)
@@ -102,6 +103,14 @@ def get_single_animal(id):
 
 
 def create_animal(animal):
+    """Adds the animal to the ANIMALS list
+
+    Args:
+        animal (dictionary): the post body from the request
+
+    Returns:
+        string: json formatted string
+    """
     max_id = ANIMALS[-1]['id']
 
     new_id = max_id + 1
@@ -119,15 +128,13 @@ def delete_animal(id):
     Args:
         id ([type]): [description]
     """
-    animal_index = -1
+    with sqlite3.connect('./kennel.db') as conn:
+        db_cursor = conn.cursor()
 
-    for index, animal in enumerate(ANIMALS):
-        if animal["id"] == id:
-            animal_index = index
-            break
-
-    if animal_index >= 0:
-        ANIMALS.pop(animal_index)
+        db_cursor.execute("""
+        delete from Animal
+        where id = ?
+        """, (id, ))
 
 
 def update_animal(id_of_animal, new_animal_dict):
