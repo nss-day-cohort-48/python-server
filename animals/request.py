@@ -131,15 +131,6 @@ def create_animal(new_animal):
 
         return json.dumps(new_animal)
 
-    # max_id = ANIMALS[-1]['id']
-
-    # new_id = max_id + 1
-    # animal['id'] = new_id
-
-    # ANIMALS.append(animal)
-
-    # return animal
-
 
 def delete_animal(id):
     """
