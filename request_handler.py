@@ -109,7 +109,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
 
-        (resource, _, _) = self.parse_url(self.path)
+        (resource, _ ) = self.parse_url(self.path)
 
         response = None
 

@@ -72,3 +72,5 @@ select
             a.customer_id
         from animal a
         where a.id = 1;
+
+SELECT * FROM Animal
