@@ -1,6 +1,6 @@
-from models.location import Location
 import sqlite3
 import json
+from models.location import Location
 
 from models import Animal
 
@@ -48,7 +48,6 @@ def get_all_animals():
             a.breed,
             a.status,
             a.location_id,
-            a.customer_id,
             l.name location_name,
             l.address location_address
             
@@ -62,11 +61,31 @@ def get_all_animals():
 
         for row in dataset:
             animal = Animal(row['id'], row['name'], row['breed'],
-                            row['status'], row['location_id'],
-                            row['customer_id'])
+                            row['status'], row['location_id'])
             location = Location(
                 row['location_id'], row['location_name'], row["location_address"])
             animal.location = location.__dict__
+            # Get the owners of the animal by following the relationship from customers to animal
+            # through the join table
+            db_cursor.execute("""
+                Select
+                    c.id,
+                    c.name
+                From Customer c
+                Join CustomerAnimal ca on c.id = ca.customer_id
+                Join Animal a on a.id = ca.animal_id
+                where a.id = ?
+            """, (animal.id, ))
+            customer_rows = db_cursor.fetchall()
+            # Loop through the customer_rows to create a dictionary for each customer
+            # then append the customer to the customers list in animal
+            for customer_row in customer_rows:
+                customer = {
+                    'id': customer_row['id'],
+                    'name': customer_row['name']
+                }
+                animal.customers.append(customer)
+
             animals.append(animal.__dict__)
 
     return json.dumps(animals)
@@ -104,8 +123,7 @@ def get_single_animal(id):
 
         # Create an animal instance from the current row
         animal = Animal(data['id'], data['name'], data['breed'],
-                        data['status'], data['location_id'],
-                        data['customer_id'])
+                        data['status'], data['location_id'])
 
         return json.dumps(animal.__dict__)
 
@@ -123,19 +141,30 @@ def create_animal(new_animal):
     with sqlite3.connect('./kennel.db') as conn:
         db_cursor = conn.cursor()
 
-
         db_cursor.execute("""
         INSERT INTO Animal
-            ( name, breed, status, location_id, customer_id )
+            ( name, breed, status, location_id )
         VALUES
-            ( ?, ?, ?, ?, ? );
+            ( ?, ?, ?, ? );
         """, (new_animal['name'], new_animal['breed'],
               new_animal['status'], new_animal['location_id'],
-              new_animal['customer_id'], ))
+              ))
 
         id = db_cursor.lastrowid
 
         new_animal['id'] = id
+
+        # new_animal['customers']: the client should pass a list of customer_id's
+        # to be associated with this animal
+        for customer_id in new_animal['customers']:
+            # When interating (looping) through the list we can insert the customer_id
+            # and new_animal['id'] into the CustomerAnimal table to set up the
+            # many to many relationship
+            db_cursor.execute("""
+            INSERT INTO CustomerAnimal
+                (customer_id, animal_id)
+            VALUES (?, ?)
+            """, (customer_id, new_animal['id']))
 
         return json.dumps(new_animal)
 
@@ -174,14 +203,12 @@ def update_animal(id_of_animal, new_animal_dict):
                 breed = ?,
                 status = ?,
                 location_id = ?,
-                customer_id = ?
             where id = ?
         """, (
             new_animal_dict['name'],
             new_animal_dict['breed'],
             new_animal_dict['status'],
             new_animal_dict['location_id'],
-            new_animal_dict['customer_id'],
             id_of_animal,
         ))
 
