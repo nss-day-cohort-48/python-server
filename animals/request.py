@@ -1,3 +1,4 @@
+from models.location import Location
 import sqlite3
 import json
 
@@ -47,9 +48,13 @@ def get_all_animals():
             a.breed,
             a.status,
             a.location_id,
-            a.customer_id
+            a.customer_id,
+            l.name location_name,
+            l.address location_address
             
         from animal a
+        Join Location l
+        on l.id = a.location_id
         """)
 
         dataset = db_cursor.fetchall()
@@ -59,6 +64,9 @@ def get_all_animals():
             animal = Animal(row['id'], row['name'], row['breed'],
                             row['status'], row['location_id'],
                             row['customer_id'])
+            location = Location(
+                row['location_id'], row['location_name'], row["location_address"])
+            animal.location = location.__dict__
             animals.append(animal.__dict__)
 
     return json.dumps(animals)
@@ -146,11 +154,29 @@ def update_animal(id_of_animal, new_animal_dict):
             new_animal_dict ([type]): [description]
     """
 
-    for index, animal in enumerate(ANIMALS):
-        # iterating the list
-        if animal['id'] == id_of_animal:
-            # when we find the correct animal (id matches arg)
-            # reassign value of item at current index to equal
-            # new animal dict arg
-            ANIMALS[index] = new_animal_dict
-            break
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+            Update Animal
+            Set 
+                name = ?,
+                breed = ?,
+                status = ?,
+                location_id = ?,
+                customer_id = ?
+            where id = ?
+        """, (
+            new_animal_dict['name'],
+            new_animal_dict['breed'],
+            new_animal_dict['status'],
+            new_animal_dict['location_id'],
+            new_animal_dict['customer_id'],
+            id_of_animal,
+        ))
+
+        rows_affected = db_cursor.rowcount
+
+        if rows_affected == 0:
+            return False
+        else:
+            return True
