@@ -110,23 +110,34 @@ def get_single_animal(id):
         return json.dumps(animal.__dict__)
 
 
-def create_animal(animal):
+def create_animal(new_animal):
     """Adds the animal to the ANIMALS list
 
-    Args:
-        animal (dictionary): the post body from the request
+        Args:
+            animal (dictionary): the post body from the request
 
-    Returns:
-        string: json formatted string
+        Returns:
+            string: json formatted string
     """
-    max_id = ANIMALS[-1]['id']
 
-    new_id = max_id + 1
-    animal['id'] = new_id
+    with sqlite3.connect('./kennel.db') as conn:
+        db_cursor = conn.cursor()
 
-    ANIMALS.append(animal)
 
-    return animal
+        db_cursor.execute("""
+        INSERT INTO Animal
+            ( name, breed, status, location_id, customer_id )
+        VALUES
+            ( ?, ?, ?, ?, ? );
+        """, (new_animal['name'], new_animal['breed'],
+              new_animal['status'], new_animal['location_id'],
+              new_animal['customer_id'], ))
+
+        id = db_cursor.lastrowid
+
+        new_animal['id'] = id
+
+        return json.dumps(new_animal)
 
 
 def delete_animal(id):
