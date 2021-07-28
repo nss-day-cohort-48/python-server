@@ -33,3 +33,11 @@ INSERT INTO `CustomerAnimal` VALUES (null, 4, 3);
 INSERT INTO `CustomerAnimal` VALUES (null, 5, 3);
 INSERT INTO `CustomerAnimal` VALUES (null, 3, 4);
 INSERT INTO `CustomerAnimal` VALUES (null, 2, 5);
+
+Select
+    c.id,
+    c.name
+From Customer c
+Join CustomerAnimal ca on c.id = ca.customer_id
+Join Animal a on a.id = ca.animal_id
+where a.id = 1;
