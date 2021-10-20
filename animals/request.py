@@ -191,3 +191,9 @@ def update_animal(id_of_animal, new_animal_dict):
             return False
         else:
             return True
+
+
+def get_animals_by_search(text):
+    animals = json.loads(get_all_animals())
+    animals = [animal for animal in animals if text.lower() in animal['name'].lower()]
+    return json.dumps(animals)

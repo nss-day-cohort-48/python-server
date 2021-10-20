@@ -1,3 +1,4 @@
+from animals.request import get_animals_by_search
 import json
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -97,6 +98,8 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = get_customers_by_email(value)
             elif key == "name" and resource == "customers":
                 response = get_customers_by_name(value)
+            elif key == "search" and resource == 'animals':
+                response = get_animals_by_search(value)
         self.wfile.write(response.encode())
 
     def do_POST(self):
